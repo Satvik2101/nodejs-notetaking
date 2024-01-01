@@ -4,8 +4,8 @@ const auth = require('../middleware/auth');
 const router = express.Router();
 
 
-router.post("/add", auth, noteController.addNote);
-router.get("/all", auth, noteController.getAllNotes);
+router.get("/", auth, noteController.getAllNotes);
+router.post("/", auth, noteController.addNote);
 router.get("/:id", auth, noteController.getNoteById);
 router.patch("/:id", auth, noteController.updateNoteById);
 router.delete("/:id", auth, noteController.deleteNoteById);

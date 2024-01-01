@@ -11,7 +11,7 @@ async function addUser(req, res) {
     }
     catch (e) {
         console.log(e.toString())
-        res.status(500).send(e);
+        res.status(400).send(e);
     }
 }
 
@@ -22,6 +22,12 @@ async function loginUser(req, res) {
         const token = await user.generateAuthToken();
         res.send({ user, token });
     } catch (e) {
+        if (e.message === "Username not found") {
+            return res.status(404).send(e.message);
+        }
+        if (e.message === "Incorrect password") {
+            return res.status(401).send(e.message);
+        }
         res.status(400).send(e.message);
     }
 }
