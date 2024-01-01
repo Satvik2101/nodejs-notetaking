@@ -41,8 +41,73 @@ async function getNoteById(req, res) {
     }
 }
 
+async function addNote(req, res) {
+    try {
+
+        const note = new Note({
+            ...req.body,
+            owner: req.user._id
+        });
+        await note.save();
+        res.status(201).send(note);
+    } catch (e) {
+        res.status(500).send(e);
+    }
+}
+
+async function updateNoteById(req, res) {
+    const _id = req.params.id;
+    if (!validateID(_id)) {
+        return res.status(400).send("Invalid ID");
+    }
+
+    const updates = Object.keys(req.body);
+    const allowedUpdateKeys = ['title', 'content'];
+
+    //Find out any updates that are not allowed
+    const invalidUpdates = updates.filter((update) =>
+        !allowedUpdateKeys.includes(update));
+
+    const finalUpdates = req.body;
+
+    //remove all the keys that are not allowed
+    invalidUpdates.forEach((update) => delete finalUpdates[update]);
+
+    try {
+        const note = await Note.findOneAndUpdate({ _id, owner: req.user._id },
+            finalUpdates, { new: true, runValidators: true }
+        );
+
+        if (!note) {
+            return res.status(404).send("Note not found");
+        }
+        res.send(note);
+    } catch (e) {
+        res.status(500).send(e);
+    }
+}
+
+async function deleteNoteById(req, res) {
+    const _id = req.params.id;
+    if (!validateID(_id)) {
+        return res.status(400).send("Invalid ID");
+    }
+
+    try {
+        const note = await Note.findOneAndDelete({ _id, owner: req.user._id });
+        if (!note) {
+            return res.status(404).send("Note not found");
+        }
+        res.send(note);
+    } catch (e) {
+        res.status(500).send(e);
+    }
+}
+
 module.exports = {
     getAllNotes,
     getNoteById,
-
+    addNote,
+    updateNoteById,
+    deleteNoteById
 }
