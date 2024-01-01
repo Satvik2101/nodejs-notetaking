@@ -1,0 +1,227 @@
+openapi: 3.0.0
+info:
+  title: Note Taking API
+  version: 1.0.0
+  description: API for managing notes
+
+paths:
+  /notes:
+    get:
+      summary: Get all notes of a particular user.
+      security:
+        - bearerAuth: []
+      
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Note'
+        '401':
+          description: Unauthorized
+            
+    
+    post:
+      summary: Create a new note
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteCreateRequest'
+      responses:
+        '201':
+          description: Note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+            
+  /notes/{id}:
+    get:
+      summary: Get a specific note
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+
+        '401':
+          description: Unauthorized
+        '404':
+          description: Note not found   
+    put:
+      summary: Update a specific note. Returns the updated note.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteUpdateRequest'
+      responses:
+        '200':
+          description: Note updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Note not found        
+    delete:
+      summary: Delete a specific note. Returns the deleted note.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Note deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '401':
+          description: Unauthorized'
+        '404':
+          description: Note not found  
+  /users/add:
+    post:
+      summary: Create a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAndToken'
+        '400':
+          description: Bad request
+  /users/login:
+    post:
+      summary: Logs in a user. Returns a JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAndToken'
+        '400':
+          description: Bad request  
+        '401':
+          description: Invalid Password
+        '404':
+          description: Username not found  
+components:
+  schemas:
+    NoteCreateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+      required:
+        - title
+        - content
+    NoteUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string    
+    Note:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier of the note. Generated automatically. Provided values will be ignored.
+        title:
+          type: string
+          description: Title of the note
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time  
+        __v:
+          type: integer    
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+    UserAndToken:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            username:
+              type: string
+            _id:
+              type: string
+            __v:
+              type: integer   
+        token:
+          type: string 
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
