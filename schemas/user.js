@@ -15,18 +15,6 @@ const userSchema = new mongoose.Schema({
             }
         }
     },
-    email: {
-        type: String,
-        required: true,
-        trim: true,
-        unique: true, // this is a unique index
-        lowercase: true,
-        validate(value) {
-            if (!validator.isEmail(value)) {
-                throw new Error('Email is invalid');
-            }
-        }
-    },
     password: {
 
         type: String,
@@ -54,3 +42,8 @@ userSchema.pre('save', async function (next) {
     next();
 }
 )
+
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;
